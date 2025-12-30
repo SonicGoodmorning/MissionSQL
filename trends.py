@@ -1,7 +1,7 @@
 import sqlite3
 import pandas as pd
 from icecream import ic
-
+import visuals
 def data():
     connection = sqlite3.connect("MissionSQL.db") ## establish the connection to db
 
@@ -45,3 +45,4 @@ ic("Data Ready")
 ic(df.head()) # print out the head of df for simplicity.
 
 correlation(df)
+visuals.priceVqual(df)
