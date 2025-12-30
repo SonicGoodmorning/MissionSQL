@@ -1,6 +1,14 @@
 import kagglehub
+import os
 
 # Download latest version
-path = kagglehub.dataset_download("fronkongames/steam-games-dataset")
+def downloadDS():
+    path = kagglehub.dataset_download("fronkongames/steam-games-dataset")
 
-print("Path to dataset files:", path)
+    jsonPath = os.path.join(path, 'games.json')
+
+    print('Dataset Ready')
+    return jsonPath
+
+if __name__ == "__main__":
+    downloadDS()
