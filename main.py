@@ -102,6 +102,7 @@ for app in dataset:
   genres = game['genres']                             # Game genres.
   for gender in genres:           
     genderName = gender                               # Gender name (string).
+    cursor.execute('INSERT INTO genres (appid, genre) VALUES (?, ?)', (appID, genderName))
 
   screenshots = game['screenshots']                   # Game screenshots.
   for screenshot in screenshots:            
