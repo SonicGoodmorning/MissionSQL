@@ -6,6 +6,74 @@ import json
 import sqlite3
 from icecream import ic
 
+def tables(cursor):
+  cursor.execute('''
+    CREATE TABLE IF NOT EXISTS games (
+      appid TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      release_date TEXT,
+      price REAL,
+      positive INTEGER,
+      negative INTEGER,
+      metacritic_score INTEGER,
+      peak_ccu INTEGER,
+      required_age INTEGER,
+      dlc_count INTEGER,
+      achievements INTEGER,
+      recommendations INTEGER,
+      average_playtime INTEGER,
+      median_playtime INTEGER
+                 )                 
+            ''')
+  ## create table for genre
+  cursor.execute('''
+    CREATE TABLE IF NOT EXISTS genres(
+          appid TEXT,
+          genre TEXT,
+          PRIMARY KEY (appid, genre),
+          FOREIGN KEY (appid) REFERENCES games(appid)
+        )              
+    ''')
+  ## create table for devs
+  cursor.execute('''
+    CREATE TABLE IF NOT EXISTS developers(
+          appid TEXT,
+          developer TEXT,
+          PRIMARY KEY (appid, developer),
+          FOREIGN KEY (appid) REFERENCES games(appid)
+        )              
+    ''')
+  ## create table for publisher
+  cursor.execute('''
+    CREATE TABLE IF NOT EXISTS publishers(
+          appid TEXT,
+          publisher TEXT,
+          PRIMARY KEY (appid, publisher),
+          FOREIGN KEY (appid) REFERENCES games(appid)
+        )              
+    ''')
+  ## create table for categories
+  cursor.execute('''
+    CREATE TABLE IF NOT EXISTS categories(
+          appid TEXT,
+          category TEXT,
+          PRIMARY KEY (appid, category),
+          FOREIGN KEY (appid) REFERENCES games(appid)
+        )              
+    ''')
+  ## create table for platforms
+  cursor.execute('''
+    CREATE TABLE IF NOT EXISTS platform_support(
+          appid TEXT PRIMARY KEY,
+          windows BOOLEAN,
+          mac BOOLEAN,
+          linux BOOLEAN,
+          FOREIGN KEY (appid) REFERENCES games(appid)
+        )              
+    ''')
+  ic("Tables Created")
+
+
 def loadData(jsonPath='games.json'):
   dataset = {}
   if os.path.exists(jsonPath):
@@ -15,32 +83,18 @@ def loadData(jsonPath='games.json'):
         dataset = json.loads(text)
   else:
     ic("kaboom, loadData dosent work.")
+    ic("Run SteamDBInstall to fix.")
     ic("Likely missing file.")
     return
+
+
+
   
   connection = sqlite3.connect("MissionSQL.db")
   cursor = connection.cursor()
-
-  cursor.execute('''
-    CREATE TABLE IF NOT EXISTS games (
-      appid TEXT PRIMARY KEY,
-      name TEXT,
-      releaseDate TEXT,
-      price REAL,
-      positive INTEGER,
-      negative INTEGER,
-      metaCritScore INTEGER
-    )
-  ''')
-
-  cursor.execute('''
-    CREATE TABLE IF NOT EXISTS genres(
-      appid TEXT,
-      genre TEXT,
-      FOREIGN KEY (appid) REFERENCES games(appid)             
-    )
-  ''')
-
+  #create tables
+  tables(cursor)
+  
   ## this was already in kaggle so I just grabbed it saves alot of time lol
   ## there is some extra data in here but for now I just want to get this working tonight
                                       ## and establish some relational data at the least.
@@ -77,6 +131,16 @@ def loadData(jsonPath='games.json'):
     recommens = game['recommendations']                 # User recommendations, 0 if it has none (int).
     averagePlaytime = game['average_playtime_forever']  # Average playtime since March 2009, in minutes (int).
     medianPlaytime = game['median_playtime_forever']    # Median playtime since March 2009, in minutes (int).
+    cursor.execute('''
+        INSERT OR IGNORE INTO games
+          (appid, name, release_date, price, positive, negative, metacritic_score,
+          peak_ccu, required_age, dlc_count, achievements, recommendations,
+          average_playtime, median_playtime)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ''', (appID, name, releaseDate, price, positive, negative, metacriticScore,
+          peakCCU, required_age, dlcCount, achievements, recommens,
+          averagePlaytime, medianPlaytime))
+        ## this line cursor.ex is the one that actually inserts the data into tables.
 
     packages = game['packages']                         # Available packages.
     for pack in packages:           
@@ -109,12 +173,27 @@ def loadData(jsonPath='games.json'):
     tags = game['tags']                                 # Tags.
     for tag in tags:           
       tagKey = tag                                      # Tag key (string, int).
-    
-    ## this line cursor.ex is the one that actually inserts the data into tables.
+
+    ## developers
+    for developer in developers:
+        cursor.execute('INSERT OR IGNORE INTO developers (appid, developer) VALUES (?, ?)', 
+                      (appID, developer))
+
+    ## publishers  
+    for publisher in publishers:
+        cursor.execute('INSERT OR IGNORE INTO publishers (appid, publisher) VALUES (?, ?)', 
+                      (appID, publisher))
+
+    ## categories
+    for category in categories:
+        cursor.execute('INSERT OR IGNORE INTO categories (appid, category) VALUES (?, ?)', 
+                      (appID, category))
+
+    ## platform support
     cursor.execute('''
-      INSERT OR IGNORE INTO games (appid, name, releaseDate, price, positive, negative, metaCritScore)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-  ''', (appID, name, releaseDate, price, positive, negative, metacriticScore)) 
+        INSERT OR IGNORE INTO platform_support (appid, windows, mac, linux)
+        VALUES (?, ?, ?, ?)
+    ''', (appID, supportWindows, supportMac, supportLinux))
     
 
   connection.commit() ## saves the changes made
