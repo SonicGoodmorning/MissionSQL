@@ -129,12 +129,15 @@ def main():
 
     GenreDf = GenreData() # Genre DataFrame
     ic(GenreDf.head()) # print head of dataframe
-
+    visuals.genre(GenreDf)
+    
     DevDf = devQualData() # dev DataFrame
     ic(DevDf.head()) # print head of dataframe
+    visuals.devQual(DevDf)
 
     PlatformDf = platformData() # Platform DataFrame
     ic(PlatformDf) # print head of dataframe
+    visuals.platformData(PlatformDf)
 
 if __name__ == "__main__":
     main()
