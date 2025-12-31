@@ -7,9 +7,10 @@ def priceVqualData():
     connection = sqlite3.connect("MissionSQL.db") ## establish the connection to db
 
     query ='''
-    SELECT price, AVG(positive) as avg_reviews, COUNT(*) as game_count
+    SELECT price, AVG(CAST(positive AS FLOAT) / (positive + negative)) as avg_reviews,
+        COUNT(*) as game_count
     FROM games
-    WHERE price > 0
+    WHERE price > 0 AND (positive + negative) > 50
     GROUP BY price
     HAVING game_count > 5 
     ORDER BY price ASC
@@ -130,7 +131,7 @@ def main():
     GenreDf = GenreData() # Genre DataFrame
     ic(GenreDf.head()) # print head of dataframe
     visuals.genre(GenreDf)
-    
+
     DevDf = devQualData() # dev DataFrame
     ic(DevDf.head()) # print head of dataframe
     visuals.devQual(DevDf)
