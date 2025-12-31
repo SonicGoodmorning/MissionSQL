@@ -94,7 +94,7 @@ def loadData(jsonPath='games.json'):
   cursor = connection.cursor()
   #create tables
   tables(cursor)
-  
+
   ## this was already in kaggle so I just grabbed it saves alot of time lol
   ## there is some extra data in here but for now I just want to get this working tonight
                                       ## and establish some relational data at the least.
@@ -110,15 +110,6 @@ def loadData(jsonPath='games.json'):
     required_age = game['required_age']                 # Age required to play, 0 if it is for all audiences (int).
     price = game['price']                               # Price in USD, 0.0 if its free (float).
     dlcCount = game['dlc_count']                        # Number of DLCs, 0 if you have none (int).
-    longDesc = game['detailed_description']             # Detailed description of the game (string).
-    shortDesc = game['short_description']               # Brief description of the game,
-    languages = game['supported_languages']             # Comma-separated enumeration of supporting languages.
-    fullAudioLanguages = game['full_audio_languages']   # Comma-separated enumeration of languages with audio support.
-    reviews = game['reviews']                           #
-    headerImage = game['header_image']                  # Header image URL in the store (string).
-    website = game['website']                           # Game website (string).
-    supportWeb = game['support_url']                    # Game support URL (string).
-    supportEmail = game['support_email']                # Game support email (string).
     supportWindows = game['windows']                    # Does it support Windows? (bool).
     supportMac = game['mac']                            # Does it support Mac? (bool).
     supportLinux = game['linux']                        # Does it support Linux? (bool).
